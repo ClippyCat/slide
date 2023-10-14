@@ -46,15 +46,15 @@ def generate_random_puzzle():
 
 # Function to count inversions
 def count_inversions(puzzle):
-	flat_puzzle = [cell for row in puzzle for cell in row if cell != 0]
-	inversions = 0
+    flat_puzzle = [cell for row in puzzle for cell in row if cell != 0]
+    inversions = 0
 
-	for i in range(len(flat_puzzle)):
-		for j in range(i + 1, len(flat_puzzle)):
-			if flat_puzzle[i] > flat_puzzle[j]:
-				inversions += 1
+    for i in range(len(flat_puzzle)):
+        for j in range(i + 1, len(flat_puzzle)):
+            if flat_puzzle[i] != 0 and flat_puzzle[j] != 0 and flat_puzzle[i] > flat_puzzle[j]:
+                inversions += 1
 
-	return inversions
+    return inversions
 
 # Function to check if a puzzle is solvable
 def is_solvable(puzzle):
