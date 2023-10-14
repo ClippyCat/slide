@@ -8,10 +8,6 @@ def print_puzzle(puzzle):
 	for row in puzzle:
 		print(" ".join(map(str, row)))
 
-# Function to swap two tiles
-def swap(puzzle, r1, c1, r2, c2):
-	puzzle[r1][c1], puzzle[r2][c2] = puzzle[r2][c2], puzzle[r1][c1]
-
 def is_solved(puzzle):
 	n = 1
 	for row in puzzle:
@@ -21,22 +17,19 @@ def is_solved(puzzle):
 			n+=1
 	return True
 
-# Function to generate a random solvable puzzle using recursion
+# Function to generate a random solvable puzzle
 def generate(puzzle, numbers):
-	if not numbers:
-		return puzzle
-	random.shuffle(numbers)
-
-	for i in range(GRID_SIZE):
-		for j in range(GRID_SIZE):
-			if i == GRID_SIZE - 1 and j == GRID_SIZE - 1:
-				break
-			puzzle[i][j] = numbers.pop()
+	if numbers:
+		random.shuffle(numbers)
+		for i in range(GRID_SIZE):
+			for j in range(GRID_SIZE):
+				if i == GRID_SIZE - 1 and j == GRID_SIZE - 1:
+					break
+				puzzle[i][j] = numbers.pop()
 
 	if is_solvable(puzzle):
 		return puzzle
-	else:
-		return generate(puzzle, numbers)
+	return generate(puzzle, numbers)
 
 # Function to generate a random solvable puzzle
 def generate_random_puzzle():
@@ -44,25 +37,19 @@ def generate_random_puzzle():
 	numbers = list(range(1, GRID_SIZE ** 2))
 	return generate(puzzle, numbers)
 
-# Function to count inversions
-def count_inversions(puzzle):
-	flat_puzzle = [cell for row in puzzle for cell in row if cell != 0]
-	inversions = 0
-	for i in range(len(flat_puzzle)):
-		for j in range(i + 1, len(flat_puzzle)):
-			if flat_puzzle[i] != 0 and flat_puzzle[j] != 0 and flat_puzzle[i] > flat_puzzle[j]:
-				inversions += 1
-	return inversions
-
 # Function to check if a puzzle is solvable
 def is_solvable(puzzle):
-	inversions = count_inversions(puzzle)
-	return inversions % 2 == 0
+	if solve_puzzle(puzzle) == None:
+		return False
+	return True
+
+# Function to swap two tiles
+def swap(puzzle, r1, c1, r2, c2):
+	puzzle[r1][c1], puzzle[r2][c2] = puzzle[r2][c2], puzzle[r1][c1]
 
 # Function to move a tile in the puzzle
 def move(puzzle, direction):
 	empty_row, empty_col = find_empty(puzzle)
-
 	if direction == 'W' and empty_row < GRID_SIZE - 1:
 		swap(puzzle, empty_row, empty_col, empty_row + 1, empty_col)
 	elif direction == 'S' and empty_row > 0:
