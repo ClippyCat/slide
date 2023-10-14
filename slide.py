@@ -17,25 +17,19 @@ def is_solved(puzzle):
 			n+=1
 	return True
 
-# Function to generate a random solvable puzzle
-def generate(puzzle, numbers):
-	if numbers:
-		random.shuffle(numbers)
-		for i in range(GRID_SIZE):
-			for j in range(GRID_SIZE):
-				if i == GRID_SIZE - 1 and j == GRID_SIZE - 1:
-					break
-				puzzle[i][j] = numbers.pop()
-
-	if is_solvable(puzzle):
-		return puzzle
-	return generate(puzzle, numbers)
-
-# Function to generate a random solvable puzzle
 def generate_random_puzzle():
 	puzzle = [[0] * GRID_SIZE for _ in range(GRID_SIZE)]
 	numbers = list(range(1, GRID_SIZE ** 2))
-	return generate(puzzle, numbers)
+	random.shuffle(numbers)
+	for i in range(GRID_SIZE):
+		for j in range(GRID_SIZE):
+			if i == GRID_SIZE - 1 and j == GRID_SIZE - 1:
+				break
+			puzzle[i][j] = numbers.pop()
+
+	if not is_solvable(puzzle):
+		swap(puzzle, 0, 0, 0, 1)
+	return puzzle
 
 # Function to check if a puzzle is solvable
 def is_solvable(puzzle):
@@ -69,7 +63,6 @@ def find_empty(puzzle):
 # Function to solve the puzzle using A* algorithm
 def solve_puzzle(puzzle):
 	def h(state):
-		# The heuristic function - in this case, we will use the Manhattan distance
 		total_distance = 0
 		for i in range(GRID_SIZE):
 			for j in range(GRID_SIZE):
@@ -92,7 +85,7 @@ def solve_puzzle(puzzle):
 	while open_list:
 		f, g, current_state = heapq.heappop(open_list)
 		if current_state == goal_state:
-			return g  # Return the number of moves to reach the goal state
+			return g
 
 		if tuple(map(tuple, current_state)) in closed_set:
 			continue
@@ -122,12 +115,8 @@ def main():
 	print("To quit, press 'Q'.")
 
 	moves = 0
-	while True:
+	while not is_solved(puzzle):
 		print_puzzle(puzzle)
-
-		if is_solved(puzzle):
-			print(f"Congratulations! You've solved the puzzle in {moves} moves!")
-			break
 
 		move_direction = input("Enter a move (W/A/S/D): ").upper()
 
@@ -139,6 +128,6 @@ def main():
 			moves+=1
 		else:
 			print("Invalid move. Use 'W/A/S/D' to move the tiles or 'Q' to quit.")
-
+	print(f"Congratulations! You've solved the puzzle in {moves} moves!")
 if __name__ == "__main__":
 	main()
