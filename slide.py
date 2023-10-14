@@ -1,7 +1,7 @@
 import random
+import heapq
 
-# Define the grid size
-GRID_SIZE = 2
+GRID_SIZE = int(input("Enter grid size:"))
 
 # Function to print the current state of the puzzle
 def print_puzzle(puzzle):
@@ -46,15 +46,13 @@ def generate_random_puzzle():
 
 # Function to count inversions
 def count_inversions(puzzle):
-    flat_puzzle = [cell for row in puzzle for cell in row if cell != 0]
-    inversions = 0
-
-    for i in range(len(flat_puzzle)):
-        for j in range(i + 1, len(flat_puzzle)):
-            if flat_puzzle[i] != 0 and flat_puzzle[j] != 0 and flat_puzzle[i] > flat_puzzle[j]:
-                inversions += 1
-
-    return inversions
+	flat_puzzle = [cell for row in puzzle for cell in row if cell != 0]
+	inversions = 0
+	for i in range(len(flat_puzzle)):
+		for j in range(i + 1, len(flat_puzzle)):
+			if flat_puzzle[i] != 0 and flat_puzzle[j] != 0 and flat_puzzle[i] > flat_puzzle[j]:
+				inversions += 1
+	return inversions
 
 # Function to check if a puzzle is solvable
 def is_solvable(puzzle):
@@ -81,19 +79,67 @@ def find_empty(puzzle):
 			if puzzle[i][j] == 0:
 				return i, j
 
+# Function to solve the puzzle using A* algorithm
+def solve_puzzle(puzzle):
+	def h(state):
+		# The heuristic function - in this case, we will use the Manhattan distance
+		total_distance = 0
+		for i in range(GRID_SIZE):
+			for j in range(GRID_SIZE):
+				if puzzle[i][j] != 0:
+					target_row, target_col = divmod(puzzle[i][j] - 1, GRID_SIZE)
+					total_distance += abs(i - target_row) + abs(j - target_col)
+		return total_distance
+
+	def is_valid(x, y):
+		return 0 <= x < GRID_SIZE and 0 <= y < GRID_SIZE
+
+	start_state = [row[:] for row in puzzle]
+	goal_state = [[i * GRID_SIZE + j + 1 for j in range(GRID_SIZE)] for i in range(GRID_SIZE)]
+	goal_state[GRID_SIZE - 1][GRID_SIZE - 1] = 0
+
+	open_list = [(h(start_state), 0, start_state)]
+	closed_set = set()
+	g_values = {tuple(map(tuple, start_state)): 0}
+
+	while open_list:
+		f, g, current_state = heapq.heappop(open_list)
+		if current_state == goal_state:
+			return g  # Return the number of moves to reach the goal state
+
+		if tuple(map(tuple, current_state)) in closed_set:
+			continue
+
+		closed_set.add(tuple(map(tuple, current_state)))
+
+		for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+			empty_row, empty_col = find_empty(current_state)
+			new_row, new_col = empty_row + dx, empty_col + dy
+			if is_valid(new_row, new_col):
+				new_state = [row[:] for row in current_state]
+				new_state[empty_row][empty_col], new_state[new_row][new_col] = new_state[new_row][new_col], new_state[empty_row][empty_col]
+				tentative_g = g_values[tuple(map(tuple, current_state))] + 1
+				if tentative_g < g_values.get(tuple(map(tuple, new_state)), float('inf')):
+					g_values[tuple(map(tuple, new_state))] = tentative_g
+					heapq.heappush(open_list, (tentative_g + h(new_state), tentative_g, new_state))
+	return None
+
 # Main game loop
 def main():
+
 	puzzle = generate_random_puzzle()
 
 	print(f"Welcome to the {GRID_SIZE}x{GRID_SIZE} Sliding Square Puzzle!")
+	print(f"You could solve the puzzle in {solve_puzzle(puzzle)} moves")
 	print("Use 'W' (up), 'A' (left), 'S' (down), and 'D' (right) to move the tiles.")
 	print("To quit, press 'Q'.")
 
+	moves = 0
 	while True:
 		print_puzzle(puzzle)
 
 		if is_solved(puzzle):
-			print("Congratulations! You've solved the puzzle.")
+			print(f"Congratulations! You've solved the puzzle in {moves} moves!")
 			break
 
 		move_direction = input("Enter a move (W/A/S/D): ").upper()
@@ -103,6 +149,7 @@ def main():
 			break
 		elif move_direction in ['W', 'A', 'S', 'D']:
 			move(puzzle, move_direction)
+			moves+=1
 		else:
 			print("Invalid move. Use 'W/A/S/D' to move the tiles or 'Q' to quit.")
 
