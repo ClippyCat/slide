@@ -16,9 +16,9 @@ def is_solved(puzzle):
 	n = 1
 	for row in puzzle:
 		for cell in row:
-			if cell != n:
+			if cell != n and n != GRID_SIZE ** 2:
 				return False
-			n = (n % (GRID_SIZE ** 2)) + 1
+			n+=1
 	return True
 
 # Function to generate a random solvable puzzle using recursion
